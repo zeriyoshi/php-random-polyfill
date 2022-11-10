@@ -35,8 +35,8 @@ final class Xoshiro256StarStar implements Engine, Serializable
     use Serialization;
 
     /**
-     * @var GMP[]|string[]|int[]
      * @psalm-suppress PropertyNotSetInConstructor Psalm doesn't traverse several levels apparently
+     * @var GMP[]|string[]|int[]
      */
     private $state;
 
@@ -161,8 +161,8 @@ final class Xoshiro256StarStar implements Engine, Serializable
     }
 
     /**
-     * @param string|GMP $seed
-     * @return string|GMP
+     * @param GMP|string|int $seed
+     * @return GMP|string|int
      */
     private function splitmix64(&$seed)
     {

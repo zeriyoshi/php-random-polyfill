@@ -11,9 +11,9 @@ declare(strict_types=1);
 
 namespace Arokettu\Random;
 
-use GMP;
-
 /**
+ * @template TValueType
+ * @psalm-type TIntSize int<4, 16>
  * @codeCoverageIgnore We don't care about math that was not used
  */
 abstract class Math
@@ -25,11 +25,17 @@ abstract class Math
     /** @var Math[] */
     private static $maths = [];
 
+    /**
+     * @param TIntSize $sizeof
+     */
     public static function create(int $sizeof): self
     {
         return self::$maths[$sizeof] ?? self::$maths[$sizeof] = self::build($sizeof);
     }
 
+    /**
+     * @param TIntSize $sizeof
+     */
     protected static function build(int $sizeof): self
     {
         // only less because PHP int is always signed
@@ -45,116 +51,116 @@ abstract class Math
     }
 
     /**
-     * @param int $sizeof
+     * @param TIntSize $sizeof
      */
     abstract protected function __construct(int $sizeof);
 
     /**
-     * @param int|string|GMP $value
+     * @param TValueType $value
      * @param int $shift
-     * @return int|string|GMP
+     * @return TValueType
      */
     abstract public function shiftLeft($value, int $shift);
 
     /**
-     * @param int|string|GMP $value
+     * @param TValueType $value
      * @param int $shift
-     * @return int|string|GMP
+     * @return TValueType
      */
     abstract public function shiftRight($value, int $shift);
 
     /**
-     * @param int|string|GMP $value1
-     * @param int|string|GMP $value2
-     * @return int|string|GMP
+     * @param TValueType $value1
+     * @param TValueType $value2
+     * @return TValueType
      */
     abstract public function add($value1, $value2);
 
     /**
-     * @param int|string|GMP $value1
+     * @param TValueType $value1
      * @param int $value2
-     * @return int|string|GMP
+     * @return TValueType
      */
     abstract public function addInt($value1, int $value2);
 
     /**
-     * @param int|string|GMP $value1
-     * @param int|string|GMP $value2
-     * @return int|string|GMP
+     * @param TValueType $value1
+     * @param TValueType $value2
+     * @return TValueType
      */
     abstract public function sub($value1, $value2);
 
     /**
-     * @param int|string|GMP $value1
+     * @param TValueType $value1
      * @param int $value2
-     * @return int|string|GMP
+     * @return TValueType
      */
     abstract public function subInt($value1, int $value2);
 
     /**
-     * @param int|string|GMP $value1
-     * @param int|string|GMP $value2
-     * @return int|string|GMP
+     * @param TValueType $value1
+     * @param TValueType $value2
+     * @return TValueType
      */
     abstract public function mul($value1, $value2);
 
     /**
-     * @param int|string|GMP $value1
+     * @param TValueType $value1
      * @param int $value2
-     * @return int|string|GMP
+     * @return TValueType
      */
     abstract public function mulInt($value1, int $value2);
 
     /**
-     * @param int|string|GMP $value1
-     * @param int|string|GMP $value2
-     * @return int|string|GMP
+     * @param TValueType $value1
+     * @param TValueType $value2
+     * @return TValueType
      */
     abstract public function mod($value1, $value2);
 
     /**
-     * @param int|string|GMP $value1
-     * @param int|string|GMP $value2
+     * @param TValueType $value1
+     * @param TValueType $value2
      * @return int
      */
     abstract public function compare($value1, $value2): int;
 
     /**
      * @param string $value
-     * @return int|string|GMP
+     * @return TValueType
      */
     abstract public function fromHex(string $value);
 
     /**
      * @param int $value
-     * @return int|string|GMP
+     * @return TValueType
      */
     abstract public function fromInt(int $value);
 
     /**
      * @param string $value
-     * @return int|string|GMP
+     * @return TValueType
      */
     abstract public function fromBinary(string $value);
 
     /**
-     * @param int|string|GMP $value
+     * @param TValueType $value
      */
     abstract public function toInt($value): int;
 
     /**
-     * @param int|string|GMP $value
+     * @param TValueType $value
      */
     abstract public function toSignedInt($value): int;
 
     /**
-     * @param int|string|GMP $value
+     * @param TValueType $value
      */
     abstract public function toBinary($value): string;
 
     /**
-     * @param int|string|GMP $value
-     * @return int[]|string[]|GMP[]
+     * @param TValueType $value
+     * @return list<TValueType>
      */
     abstract public function splitHiLo($value): array;
 }

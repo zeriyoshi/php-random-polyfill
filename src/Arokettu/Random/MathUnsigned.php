@@ -30,6 +30,7 @@ use function Arokettu\Unsigned\to_signed_int;
  * @internal
  * @psalm-suppress MoreSpecificImplementedParamType
  * @codeCoverageIgnore We don't care about math that was not used
+ * @extends Math<string>
  */
 // phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
 // phpcs:disable SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint
@@ -38,136 +39,71 @@ final class MathUnsigned extends Math
     /** @var int */
     private $sizeof;
 
-    /**
-     * @param int $sizeof
-     */
     public function __construct(int $sizeof)
     {
         $this->sizeof = $sizeof;
     }
 
-    /**
-     * @param string $value
-     * @param int $shift
-     * @return string
-     */
     public function shiftLeft($value, int $shift)
     {
         return shift_left($value, $shift);
     }
 
-    /**
-     * @param string $value
-     * @param int $shift
-     * @return string
-     */
     public function shiftRight($value, int $shift)
     {
         return shift_right($value, $shift);
     }
 
-    /**
-     * @param string $value1
-     * @param string $value2
-     * @return string
-     */
     public function add($value1, $value2)
     {
         return add($value1, $value2);
     }
 
-    /**
-     * @param string $value1
-     * @param int $value2
-     * @return string
-     */
     public function addInt($value1, int $value2)
     {
         return add_int($value1, $value2);
     }
 
-    /**
-     * @param string $value1
-     * @param string $value2
-     * @return string
-     */
     public function sub($value1, $value2)
     {
         return sub($value1, $value2);
     }
 
-    /**
-     * @param string $value1
-     * @param int $value2
-     * @return string
-     */
     public function subInt($value1, int $value2)
     {
         return sub_int($value1, $value2);
     }
 
-    /**
-     * @param string $value1
-     * @param string $value2
-     * @return string
-     */
     public function mul($value1, $value2)
     {
         return mul($value1, $value2);
     }
 
-    /**
-     * @param string $value1
-     * @param int $value2
-     * @return string
-     */
     public function mulInt($value1, int $value2)
     {
         return mul_int($value1, $value2);
     }
 
-    /**
-     * @param string $value1
-     * @param string $value2
-     * @return string
-     */
     public function mod($value1, $value2)
     {
         return mod($value1, $value2);
     }
 
-    /**
-     * @param string $value1
-     * @param string $value2
-     * @return int
-     */
     public function compare($value1, $value2): int
     {
         return compare($value1, $value2);
     }
 
-    /**
-     * @param string $value
-     * @return string
-     */
     public function fromHex(string $value)
     {
         return from_hex($value, $this->sizeof);
     }
 
-    /**
-     * @param int $value
-     * @return string
-     */
     public function fromInt(int $value)
     {
         return from_int($value, $this->sizeof);
     }
 
-    /**
-     * @param string $value
-     * @return string
-     */
     public function fromBinary(string $value)
     {
         switch (\strlen($value) <=> $this->sizeof) {
@@ -182,34 +118,21 @@ final class MathUnsigned extends Math
         return $value;
     }
 
-    /**
-     * @param string $value
-     */
     public function toInt($value): int
     {
         return to_int($value);
     }
 
-    /**
-     * @param string $value
-     */
     public function toSignedInt($value): int
     {
         return to_signed_int($value);
     }
 
-    /**
-     * @param string $value
-     */
     public function toBinary($value): string
     {
         return $value;
     }
 
-    /**
-     * @param string $value
-     * @return string[]
-     */
     public function splitHiLo($value): array
     {
         /** @psalm-suppress PossiblyInvalidArrayAccess */

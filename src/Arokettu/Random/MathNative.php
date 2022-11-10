@@ -14,6 +14,8 @@ namespace Arokettu\Random;
 /**
  * @internal
  * @psalm-suppress MoreSpecificImplementedParamType
+ * @psalm-import-type TIntSize from Math
+ * @extends Math<int>
  * @codeCoverageIgnore We don't care about math that was not used
  */
 // phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
@@ -24,84 +26,50 @@ final class MathNative extends Math
     private $mask;
     /** @var int */
     private $halfMask;
-    /** @var int */
+    /** @var TIntSize */
     private $sizeof;
 
     /**
-     * @param int $sizeof
+     * @inheritDoc
      */
     public function __construct(int $sizeof)
     {
         $this->mask = (2 ** ($sizeof * 8)) - 1;
         $this->halfMask = (2 ** ($sizeof * 4)) - 1;
+        /** @var TIntSize $sizeof */
         $this->sizeof = $sizeof;
     }
 
-    /**
-     * @param int $value
-     * @param int $shift
-     * @return int
-     */
     public function shiftLeft($value, int $shift)
     {
         return ($value << $shift) & $this->mask;
     }
 
-    /**
-     * @param int $value
-     * @param int $shift
-     * @return int
-     */
     public function shiftRight($value, int $shift)
     {
         return $value >> $shift;
     }
 
-    /**
-     * @param int $value1
-     * @param int $value2
-     * @return int
-     */
     public function add($value1, $value2)
     {
         return ($value1 + $value2) & $this->mask;
     }
 
-    /**
-     * @param int $value1
-     * @param int $value2
-     * @return int
-     */
     public function addInt($value1, int $value2)
     {
         return ($value1 + $value2) & $this->mask;
     }
 
-    /**
-     * @param int $value1
-     * @param int $value2
-     * @return int
-     */
     public function sub($value1, $value2)
     {
         return ($value1 - $value2) & $this->mask;
     }
 
-    /**
-     * @param int $value1
-     * @param int $value2
-     * @return int
-     */
     public function subInt($value1, int $value2)
     {
         return ($value1 - $value2) & $this->mask;
     }
 
-    /**
-     * @param int $value1
-     * @param int $value2
-     * @return int
-     */
     public function mul($value1, $value2)
     {
         // do some crazy stuff to avoid overflow larger than a byte
@@ -119,58 +87,31 @@ final class MathNative extends Math
         return (($hi << $halfBits) + $lo) & $this->mask;
     }
 
-    /**
-     * @param int $value1
-     * @param int $value2
-     * @return int
-     */
     public function mulInt($value1, int $value2)
     {
         return $this->mul($value1, $value2);
     }
 
-    /**
-     * @param int $value1
-     * @param int $value2
-     * @return int
-     */
     public function mod($value1, $value2)
     {
         return $value1 % $value2;
     }
 
-    /**
-     * @param int $value1
-     * @param int $value2
-     * @return int
-     */
     public function compare($value1, $value2): int
     {
         return $value1 <=> $value2;
     }
 
-    /**
-     * @param string $value
-     * @return int
-     */
     public function fromHex(string $value)
     {
         return \hexdec($value);
     }
 
-    /**
-     * @param int $value
-     * @return int
-     */
     public function fromInt(int $value)
     {
         return $value & $this->mask;
     }
 
-    /**
-     * @param string $value
-     * @return int
-     */
     public function fromBinary(string $value)
     {
         switch (\strlen($value) <=> $this->sizeof) {
@@ -185,17 +126,11 @@ final class MathNative extends Math
         return $this->fromHex(\bin2hex(\strrev($value)));
     }
 
-    /**
-     * @param int $value
-     */
     public function toInt($value): int
     {
         return $value;
     }
 
-    /**
-     * @param int $value
-     */
     public function toSignedInt($value): int
     {
         if ($value & 1 << ($this->sizeof * 8 - 1)) { // sign
@@ -205,9 +140,6 @@ final class MathNative extends Math
         return $value;
     }
 
-    /**
-     * @param int $value
-     */
     public function toBinary($value): string
     {
         $hex = \dechex($value);
@@ -216,11 +148,11 @@ final class MathNative extends Math
     }
 
     /**
-     * @param int $value
-     * @return int[]
+     * @psalm-suppress InvalidReturnType always array{int, int}
      */
     public function splitHiLo($value): array
     {
+        /** @psalm-suppress InvalidReturnStatement always array{int, int} */
         return [
             $value >> ($this->sizeof * 8 / 2),
             $value & $this->halfMask,
