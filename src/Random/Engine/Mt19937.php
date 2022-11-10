@@ -143,18 +143,20 @@ final class Mt19937 implements Engine, Serializable
      */
     private function initMath(): void
     {
-        if (self::$math === null) {
-            self::$math = Math::create(Math::SIZEOF_UINT32_T);
+        $math = &self::$math;
 
-            self::$TWIST_CONST      = self::$math->fromHex('9908b0df'); // can't fit into signed 32bit int
-            self::$SEED_STEP_VALUE  = self::$math->fromInt(1812433253); // can fit into signed 32bit int
-            self::$HI_BIT           = self::$math->fromHex('80000000'); // can't fit into signed 32bit int
-            self::$LO_BIT           = self::$math->fromInt(1); // can fit into signed 32bit int
-            self::$LO_BITS          = self::$math->fromInt(0x7FFFFFFF); // can fit into signed 32bit int
-            self::$GEN1             = self::$math->fromHex('9d2c5680'); // can't fit into signed 32bit int
-            self::$GEN2             = self::$math->fromHex('efc60000'); // can't fit into signed 32bit int
+        if ($math === null) {
+            $math = Math::create(Math::SIZEOF_UINT32_T);
 
-            self::$ZERO             = self::$math->fromInt(0);
+            self::$TWIST_CONST      = $math->fromHex('9908b0df'); // can't fit into signed 32bit int
+            self::$SEED_STEP_VALUE  = $math->fromInt(1812433253); // can fit into signed 32bit int
+            self::$HI_BIT           = $math->fromHex('80000000'); // can't fit into signed 32bit int
+            self::$LO_BIT           = $math->fromInt(1); // can fit into signed 32bit int
+            self::$LO_BITS          = $math->fromInt(0x7FFFFFFF); // can fit into signed 32bit int
+            self::$GEN1             = $math->fromHex('9d2c5680'); // can't fit into signed 32bit int
+            self::$GEN2             = $math->fromHex('efc60000'); // can't fit into signed 32bit int
+
+            self::$ZERO             = $math->fromInt(0);
         }
     }
 
@@ -163,11 +165,13 @@ final class Mt19937 implements Engine, Serializable
         /** @var GMP[]|string[]|int[] $state */
         $state = \array_fill(0, self::N, null);
 
-        $prevState = $state[0] = self::$math->fromInt($seed);
+        $math = &self::$math;
+
+        $prevState = $state[0] = $math->fromInt($seed);
         for ($i = 1; $i < self::N; $i++) {
-            $prevState = $state[$i] = self::$math->addInt(self::$math->mul(
+            $prevState = $state[$i] = $math->addInt($math->mul(
                 self::$SEED_STEP_VALUE,
-                $prevState ^ self::$math->shiftRight($prevState, 30)
+                $prevState ^ $math->shiftRight($prevState, 30)
             ), $i);
         }
 
@@ -222,13 +226,15 @@ final class Mt19937 implements Engine, Serializable
             $this->reload();
         }
 
-        $s1 = $this->state[$this->stateCount++];
-        $s1 ^= self::$math->shiftRight($s1, 11);
-        $s1 ^= self::$math->shiftLeft($s1, 7) & self::$GEN1;
-        $s1 ^= self::$math->shiftLeft($s1, 15) & self::$GEN2;
-        $s1 ^= self::$math->shiftRight($s1, 18);
+        $math = &self::$math;
 
-        return self::$math->toBinary($s1);
+        $s1 = $this->state[$this->stateCount++];
+        $s1 ^= $math->shiftRight($s1, 11);
+        $s1 ^= $math->shiftLeft($s1, 7) & self::$GEN1;
+        $s1 ^= $math->shiftLeft($s1, 15) & self::$GEN2;
+        $s1 ^= $math->shiftRight($s1, 18);
+
+        return $math->toBinary($s1);
     }
 
     /**
@@ -237,8 +243,10 @@ final class Mt19937 implements Engine, Serializable
      */
     private function getStates(): array
     {
-        $states = \array_map(function ($state) {
-            return \bin2hex(self::$math->toBinary($state));
+        $math = &self::$math;
+
+        $states = \array_map(static function ($state) use ($math) {
+            return \bin2hex($math->toBinary($state));
         }, $this->state);
         $states[] = $this->stateCount;
         $states[] = $this->mode;

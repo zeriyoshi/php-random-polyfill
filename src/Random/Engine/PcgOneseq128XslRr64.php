@@ -99,17 +99,20 @@ final class PcgOneseq128XslRr64 implements Engine, Serializable
      */
     private function initMath(): void
     {
-        if (self::$math64 === null) {
-            self::$math64  = Math::create(Math::SIZEOF_UINT64_T);
-            self::$math128 = Math::create(Math::SIZEOF_UINT128_T);
+        $math64 = &self::$math64;
+        $math128 = &self::$math128;
+
+        if ($math64 === null) {
+            $math64  = Math::create(Math::SIZEOF_UINT64_T);
+            $math128 = Math::create(Math::SIZEOF_UINT128_T);
 
             // 2549297995355413924 << 64 | 4865540595714422341
-            self::$STEP_MUL_CONST = self::$math128->fromHex('2360ed051fc65da44385df649fccf645');
+            self::$STEP_MUL_CONST = $math128->fromHex('2360ed051fc65da44385df649fccf645');
             // 6364136223846793005 << 64 | 1442695040888963407
-            self::$STEP_ADD_CONST = self::$math128->fromHex('5851f42d4c957f2d14057b7ef767814f');
+            self::$STEP_ADD_CONST = $math128->fromHex('5851f42d4c957f2d14057b7ef767814f');
 
-            self::$ZERO = self::$math128->fromInt(0);
-            self::$ONE  = self::$math128->fromInt(1);
+            self::$ZERO = $math128->fromInt(0);
+            self::$ONE  = $math128->fromInt(1);
         }
     }
 
@@ -139,8 +142,10 @@ final class PcgOneseq128XslRr64 implements Engine, Serializable
 
     private function step(): void
     {
-        $this->state = self::$math128->add(
-            self::$math128->mul($this->state, self::$STEP_MUL_CONST),
+        $math128 = &self::$math128;
+
+        $this->state = $math128->add(
+            $math128->mul($this->state, self::$STEP_MUL_CONST),
             self::$STEP_ADD_CONST
         );
     }
@@ -158,14 +163,16 @@ final class PcgOneseq128XslRr64 implements Engine, Serializable
     {
         [$hi, $lo] = self::$math128->splitHiLo($state);
 
+        $math64 = &self::$math64;
+
         $v = $hi ^ $lo;
-        $s = self::$math64->toInt(self::$math64->shiftRight($hi, 58));
+        $s = $math64->toInt($math64->shiftRight($hi, 58));
 
         $result =
-            self::$math64->shiftRight($v, $s) |
-            self::$math64->shiftLeft($v, -$s & 63);
+            $math64->shiftRight($v, $s) |
+            $math64->shiftLeft($v, -$s & 63);
 
-        return self::$math64->toBinary($result);
+        return $math64->toBinary($result);
     }
 
     public function jump(int $advance): void
@@ -179,18 +186,20 @@ final class PcgOneseq128XslRr64 implements Engine, Serializable
             throw new ValueError(__METHOD__ . '(): Argument #1 ($advance) must be greater than or equal to 0');
         }
 
+        $math128 = &self::$math128;
+
         while ($advance > 0) {
             if ($advance & 1) {
-                $accMult = self::$math128->mul($accMult, $curMult);
-                $accPlus = self::$math128->add(self::$math128->mul($accPlus, $curMult), $curPlus);
+                $accMult = $math128->mul($accMult, $curMult);
+                $accPlus = $math128->add($math128->mul($accPlus, $curMult), $curPlus);
             }
-            $curPlus = self::$math128->mul(self::$math128->add($curMult, self::$ONE), $curPlus);
-            $curMult = self::$math128->mul($curMult, $curMult);
+            $curPlus = $math128->mul($math128->add($curMult, self::$ONE), $curPlus);
+            $curMult = $math128->mul($curMult, $curMult);
 
             $advance >>= 1;
         }
 
-        $this->state = self::$math128->add(self::$math128->mul($accMult, $this->state), $accPlus);
+        $this->state = $math128->add($math128->mul($accMult, $this->state), $accPlus);
     }
 
     /**

@@ -126,25 +126,27 @@ final class Xoshiro256StarStar implements Engine, Serializable
      */
     private function initMath(): void
     {
-        if (self::$math === null) {
-            self::$math = Math::create(Math::SIZEOF_UINT64_T);
+        $math = &self::$math;
 
-            self::$SPLITMIX64_1 = self::$math->fromHex('9e3779b97f4a7c15');
-            self::$SPLITMIX64_2 = self::$math->fromHex('bf58476d1ce4e5b9');
-            self::$SPLITMIX64_3 = self::$math->fromHex('94d049bb133111eb');
+        if ($math === null) {
+            $math = Math::create(Math::SIZEOF_UINT64_T);
 
-            self::$JUMP1 = self::$math->fromHex('180ec6d33cfd0aba');
-            self::$JUMP2 = self::$math->fromHex('d5a61266f0c9392c');
-            self::$JUMP3 = self::$math->fromHex('a9582618e03fc9aa');
-            self::$JUMP4 = self::$math->fromHex('39abdc4529b1661c');
+            self::$SPLITMIX64_1 = $math->fromHex('9e3779b97f4a7c15');
+            self::$SPLITMIX64_2 = $math->fromHex('bf58476d1ce4e5b9');
+            self::$SPLITMIX64_3 = $math->fromHex('94d049bb133111eb');
 
-            self::$JUMP_LONG1 = self::$math->fromHex('76e15d3efefdcbbf');
-            self::$JUMP_LONG2 = self::$math->fromHex('c5004e441c522fb3');
-            self::$JUMP_LONG3 = self::$math->fromHex('77710069854ee241');
-            self::$JUMP_LONG4 = self::$math->fromHex('39109bb02acbe635');
+            self::$JUMP1 = $math->fromHex('180ec6d33cfd0aba');
+            self::$JUMP2 = $math->fromHex('d5a61266f0c9392c');
+            self::$JUMP3 = $math->fromHex('a9582618e03fc9aa');
+            self::$JUMP4 = $math->fromHex('39abdc4529b1661c');
 
-            self::$ZERO = self::$math->fromInt(0);
-            self::$ONE  = self::$math->fromInt(1);
+            self::$JUMP_LONG1 = $math->fromHex('76e15d3efefdcbbf');
+            self::$JUMP_LONG2 = $math->fromHex('c5004e441c522fb3');
+            self::$JUMP_LONG3 = $math->fromHex('77710069854ee241');
+            self::$JUMP_LONG4 = $math->fromHex('39109bb02acbe635');
+
+            self::$ZERO = $math->fromInt(0);
+            self::$ONE  = $math->fromInt(1);
         }
     }
 
@@ -166,21 +168,25 @@ final class Xoshiro256StarStar implements Engine, Serializable
      */
     private function splitmix64(&$seed)
     {
-        $r = $seed = self::$math->add($seed, self::$SPLITMIX64_1);
-        $r = self::$math->mul(($r ^ self::$math->shiftRight($r, 30)), self::$SPLITMIX64_2);
-        $r = self::$math->mul(($r ^ self::$math->shiftRight($r, 27)), self::$SPLITMIX64_3);
-        return $r ^ self::$math->shiftRight($r, 31);
+        $math = &self::$math;
+
+        $r = $seed = $math->add($seed, self::$SPLITMIX64_1);
+        $r = $math->mul(($r ^ $math->shiftRight($r, 30)), self::$SPLITMIX64_2);
+        $r = $math->mul(($r ^ $math->shiftRight($r, 27)), self::$SPLITMIX64_3);
+        return $r ^ $math->shiftRight($r, 31);
     }
 
     private function seedString(string $seed): void
     {
         $seeds = \str_split($seed, 8);
 
+        $math = &self::$math;
+
         $this->seed256(
-            self::$math->fromBinary($seeds[0]),
-            self::$math->fromBinary($seeds[1]),
-            self::$math->fromBinary($seeds[2]),
-            self::$math->fromBinary($seeds[3])
+            $math->fromBinary($seeds[0]),
+            $math->fromBinary($seeds[1]),
+            $math->fromBinary($seeds[2]),
+            $math->fromBinary($seeds[3])
         );
     }
 
@@ -197,11 +203,13 @@ final class Xoshiro256StarStar implements Engine, Serializable
 
     public function generate(): string
     {
-        $r = self::$math->mulInt(
-            $this->rotl(self::$math->mulInt($this->state[1], 5), 7),
+        $math = &self::$math;
+
+        $r = $math->mulInt(
+            $this->rotl($math->mulInt($this->state[1], 5), 7),
             9
         );
-        $t = self::$math->shiftLeft($this->state[1], 17);
+        $t = $math->shiftLeft($this->state[1], 17);
 
         $this->state[2] ^= $this->state[0];
         $this->state[3] ^= $this->state[1];
@@ -212,7 +220,7 @@ final class Xoshiro256StarStar implements Engine, Serializable
 
         $this->state[3] = $this->rotl($this->state[3], 45);
 
-        return self::$math->toBinary($r);
+        return $math->toBinary($r);
     }
 
     /**
@@ -221,9 +229,11 @@ final class Xoshiro256StarStar implements Engine, Serializable
      */
     private function rotl($x, int $k)
     {
+        $math = &self::$math;
+
         return
-            self::$math->shiftLeft($x, $k) |
-            self::$math->shiftRight($x, 64 - $k);
+            $math->shiftLeft($x, $k) |
+            $math->shiftRight($x, 64 - $k);
     }
 
     public function jump(): void
@@ -275,11 +285,13 @@ final class Xoshiro256StarStar implements Engine, Serializable
      */
     private function getStates(): array
     {
+        $math = &self::$math;
+
         return [
-            \bin2hex(self::$math->toBinary($this->state[0])),
-            \bin2hex(self::$math->toBinary($this->state[1])),
-            \bin2hex(self::$math->toBinary($this->state[2])),
-            \bin2hex(self::$math->toBinary($this->state[3])),
+            \bin2hex($math->toBinary($this->state[0])),
+            \bin2hex($math->toBinary($this->state[1])),
+            \bin2hex($math->toBinary($this->state[2])),
+            \bin2hex($math->toBinary($this->state[3])),
         ];
     }
 

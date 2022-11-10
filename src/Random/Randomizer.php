@@ -76,17 +76,20 @@ final class Randomizer implements Serializable
      */
     private function initMath(): void
     {
-        if (self::$math32 === null) {
-            self::$math32 = Math::create(Math::SIZEOF_UINT32_T);
-            self::$math64 = Math::create(Math::SIZEOF_UINT64_T);
+        $math32 = &self::$math32;
+        $math64 = &self::$math64;
 
-            self::$UINT32_ZERO = self::$math32->fromInt(0);
-            self::$UINT32_MAX  = self::$math32->fromHex('ffffffff');
+        if ($math32 === null) {
+            $math32 = Math::create(Math::SIZEOF_UINT32_T);
+            $math64 = Math::create(Math::SIZEOF_UINT64_T);
 
-            self::$UINT64_ZERO = self::$math64->fromInt(0);
-            self::$UINT64_MAX  = self::$math64->fromHex('ffffffffffffffff');
+            self::$UINT32_ZERO = $math32->fromInt(0);
+            self::$UINT32_MAX  = $math32->fromHex('ffffffff');
 
-            self::$UINT32_MAX_64 = self::$math64->fromHex('ffffffff');
+            self::$UINT64_ZERO = $math64->fromInt(0);
+            self::$UINT64_MAX  = $math64->fromHex('ffffffffffffffff');
+
+            self::$UINT32_MAX_64 = $math64->fromHex('ffffffff');
         }
     }
 
@@ -136,15 +139,18 @@ final class Randomizer implements Serializable
             return $this->rangeBadscaling($min, $max);
         }
 
-        $umax = self::$math64->subInt(self::$math64->fromInt($max), $min);
+        $math32 = &self::$math32;
+        $math64 = &self::$math64;
 
-        if (self::$math64->compare($umax, self::$UINT32_MAX_64) > 0) {
+        $umax = $math64->subInt($math64->fromInt($max), $min);
+
+        if ($math64->compare($umax, self::$UINT32_MAX_64) > 0) {
             $rangeval = $this->range64($umax);
-            return self::$math64->toSignedInt(self::$math64->addInt($rangeval, $min));
+            return $math64->toSignedInt($math64->addInt($rangeval, $min));
         } else {
-            $umax = self::$math32->subInt(self::$math32->fromInt($max), $min);
+            $umax = $math32->subInt($math32->fromInt($max), $min);
             $rangeval = $this->range32($umax);
-            return self::$math32->toSignedInt(self::$math32->addInt($rangeval, $min));
+            return $math32->toSignedInt($math32->addInt($rangeval, $min));
         }
     }
 
@@ -159,31 +165,34 @@ final class Randomizer implements Serializable
             $result .= $this->generate();
         } while (\strlen($result) < Math::SIZEOF_UINT32_T);
 
-        $result = self::$math32->fromBinary($result);
+        $math32 = &self::$math32;
+        $UINT32_MAX = &self::$UINT32_MAX;
 
-        if ($umax == self::$UINT32_MAX) {
+        $result = $math32->fromBinary($result);
+
+        if ($umax == $UINT32_MAX) {
             return $result;
         }
 
         $umax1 = $umax;
-        $umax = self::$math32->addInt($umax, 1);
+        $umax = $math32->addInt($umax, 1);
 
         if (($umax & $umax1) == self::$UINT32_ZERO) {
             return $result & $umax1;
         }
 
-        $limit = //self::$UINT32_MAX - (self::$UINT32_MAX % $umax) - 1;
-            self::$math32->subInt(
-                self::$math32->sub(
-                    self::$UINT32_MAX,
-                    self::$math32->mod(self::$UINT32_MAX, $umax)
+        $limit = // $UINT32_MAX - ($UINT32_MAX % $umax) - 1;
+            $math32->subInt(
+                $math32->sub(
+                    $UINT32_MAX,
+                    $math32->mod(self::$UINT32_MAX, $umax)
                 ),
                 1
             );
 
         $count = 0;
 
-        while (self::$math32->compare($result, $limit) > 0) {
+        while ($math32->compare($result, $limit) > 0) {
             if (++$count > self::RANDOM_RANGE_ATTEMPTS) {
                 throw new BrokenRandomEngineError('Failed to generate an acceptable random number in 50 attempts');
             }
@@ -193,10 +202,10 @@ final class Randomizer implements Serializable
                 $result .= $this->generate();
             } while (\strlen($result) < Math::SIZEOF_UINT32_T);
 
-            $result = self::$math32->fromBinary($result);
+            $result = $math32->fromBinary($result);
         }
 
-        return self::$math32->mod($result, $umax);
+        return $math32->mod($result, $umax);
     }
 
     /**
@@ -210,31 +219,34 @@ final class Randomizer implements Serializable
             $result .= $this->generate();
         } while (\strlen($result) < Math::SIZEOF_UINT64_T);
 
-        $result = self::$math64->fromBinary($result);
+        $math64 = &self::$math64;
+        $UINT64_MAX = &self::$UINT64_MAX;
 
-        if ($umax == self::$UINT64_MAX) {
+        $result = $math64->fromBinary($result);
+
+        if ($umax == $UINT64_MAX) {
             return $result;
         }
 
         $umax1 = $umax;
-        $umax = self::$math64->addInt($umax, 1);
+        $umax = $math64->addInt($umax, 1);
 
         if (($umax & $umax1) == self::$UINT64_ZERO) {
             return $result & $umax1;
         }
 
-        $limit = //self::$UINT64_MAX - (self::$UINT64_MAX % $umax) - 1;
-            self::$math64->subInt(
-                self::$math64->sub(
-                    self::$UINT64_MAX,
-                    self::$math64->mod(self::$UINT64_MAX, $umax)
+        $limit = // $UINT64_MAX - ($UINT64_MAX % $umax) - 1;
+            $math64->subInt(
+                $math64->sub(
+                    $UINT64_MAX,
+                    $math64->mod($UINT64_MAX, $umax)
                 ),
                 1
             );
 
         $count = 0;
 
-        while (self::$math64->compare($result, $limit) > 0) {
+        while ($math64->compare($result, $limit) > 0) {
             if (++$count > self::RANDOM_RANGE_ATTEMPTS) {
                 throw new BrokenRandomEngineError('Failed to generate an acceptable random number in 50 attempts');
             }
@@ -244,17 +256,19 @@ final class Randomizer implements Serializable
                 $result .= $this->generate();
             } while (\strlen($result) < Math::SIZEOF_UINT64_T);
 
-            $result = self::$math64->fromBinary($result);
+            $result = $math64->fromBinary($result);
         }
 
-        return self::$math64->mod($result, $umax);
+        return $math64->mod($result, $umax);
     }
 
     private function rangeBadscaling(int $min, int $max): int
     {
+        $math32 = &self::$math32;
+
         $n = $this->generate();
-        $n = self::$math32->fromBinary($n);
-        $n = self::$math32->toInt(self::$math32->shiftRight($n, 1));
+        $n = $math32->fromBinary($n);
+        $n = $math32->toInt($math32->shiftRight($n, 1));
         // (__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
         /** @noinspection PhpCastIsUnnecessaryInspection */
         return \intval($min + \intval((\floatval($max) - $min + 1.0) * ($n / (self::PHP_MT_RAND_MAX + 1.0))));
@@ -269,9 +283,12 @@ final class Randomizer implements Serializable
             throw new RandomException('Generated value exceeds size of int');
         }
         // @codeCoverageIgnoreEnd
-        $result = self::$math64->fromBinary($result);
 
-        return self::$math64->toInt(self::$math64->shiftRight($result, 1));
+        $math64 = &self::$math64;
+
+        $result = $math64->fromBinary($result);
+
+        return $math64->toInt($math64->shiftRight($result, 1));
     }
 
     public function getBytes(int $length): string

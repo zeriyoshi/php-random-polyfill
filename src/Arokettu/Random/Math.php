@@ -27,7 +27,8 @@ abstract class Math
 
     public static function create(int $sizeof): self
     {
-        return self::$maths[$sizeof] ?? self::$maths[$sizeof] = self::build($sizeof);
+        $maths = &self::$maths;
+        return $maths[$sizeof] ?? $maths[$sizeof] = self::build($sizeof);
     }
 
     protected static function build(int $sizeof): self
